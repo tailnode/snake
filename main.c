@@ -6,6 +6,7 @@
 int bodyLenth = START_LENGTH;   // 蛇的长度
 WINDOW* mainArea;
 Snake snake;
+Dir nextDir;
 
 int initWindow();
 int initSnake();
@@ -55,6 +56,7 @@ int initSnake()
     int index;
 
     snake.dir = DOWN;
+    nextDir = snake.dir;
     snake.length = START_LENGTH;
 
     for (index = 0; index < START_LENGTH; index++)
@@ -104,6 +106,8 @@ int moveSnake()
     int oldTailNodeY = snake.bodyNode[bodyLenth - 1].posY;
     BodyNode tmpNode = snake.bodyNode[0];
     
+    snake.dir = nextDir;
+
     switch (snake.dir)
     {
         case UP:
@@ -176,41 +180,38 @@ int hitCheck(BodyNode* headNode)
 // 取得键盘输入，改变蛇的移动方向或退出
 void* getInput(void* arg)
 {
-    int key;
-    
     keypad(stdscr, TRUE);
     noecho();
 
     do
     {
-        //key = getch();
         switch (getch())
         {
             case KEY_RIGHT:
                 if (snake.dir != LEFT)
                 {
-                    snake.dir = RIGHT;
+                    nextDir = RIGHT;
                 }
                 break;
 
             case KEY_LEFT:
                 if (snake.dir != RIGHT)
                 {
-                    snake.dir = LEFT;
+                    nextDir = LEFT;
                 }
                 break;
 
             case KEY_UP:
                 if (snake.dir != DOWN)
                 {
-                    snake.dir = UP;
+                    nextDir = UP;
                 }
                 break;
 
             case KEY_DOWN:
                 if (snake.dir != UP)
                 {
-                    snake.dir = DOWN;
+                    nextDir = DOWN;
                 }
                 break;
 

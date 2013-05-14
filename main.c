@@ -16,6 +16,7 @@ void* getInput(void* arg);
 int main()
 {
     int ret;
+    int isHit;
     pthread_t getInputThread;
 
     initscr();
@@ -34,11 +35,16 @@ int main()
 
     while (true)
     {
-        moveSnake();
+        isHit = moveSnake();
+
+        if (HIT_HIT == isHit)
+        {
+            break;
+        }
+
         usleep(300000);
     }
 
-    sleep(20);
     endwin();
     return 0;
 }
@@ -84,7 +90,7 @@ int initWindow()
 {
     refresh();
     mainArea = newwin(MAIN_AREA_HEIGHT + 2, MAIN_AREA_WIDTH + 2, 0, 0);
-    box(mainArea, 0, 0);
+    box(mainArea, MAIN_AREA_STARTY, MAIN_AREA_STARTX);
     wrefresh(mainArea);
 
     return 0;
@@ -137,12 +143,33 @@ int moveSnake()
     printw(" ");
     showSnake();
 
-    return 0;
+    return HIT_NOHIT;
 }
 
 // 碰撞检测
 int hitCheck(BodyNode* headNode)
 {
+    int index;
+    
+    // 撞到边界
+    if (headNode->posX <= MAIN_AREA_STARTX ||
+        headNode->posY <= MAIN_AREA_STARTY ||
+        headNode->posX >= MAIN_AREA_STARTX + MAIN_AREA_WIDTH + 1 ||
+        headNode->posY >= MAIN_AREA_STARTY + MAIN_AREA_HEIGHT + 1)
+    {
+        return HIT_HIT;
+    }
+
+    // 撞到自己
+    for (index = 3; index < snake.length - 1; index++)
+    {
+        if (headNode->posX == snake.bodyNode[index].posX &&
+            headNode->posY == snake.bodyNode[index].posY)
+        {
+            return HIT_HIT;
+        }
+    }
+
     return HIT_NOHIT;
 }
 

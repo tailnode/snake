@@ -62,8 +62,8 @@ int initSnake()
     for (index = 0; index < START_LENGTH; index++)
     {
         snake.bodyNode[index].charactor = BODY_CHAR + index;
-        snake.bodyNode[index].posX = START_LENGTH - index;
-        snake.bodyNode[index].posY = 1;
+        snake.bodyNode[index].posX = MAIN_AREA_STARTX + START_LENGTH - index;
+        snake.bodyNode[index].posY = MAIN_AREA_STARTY + 1;
         snake.bodyNode[index].n = index;
     }
 
@@ -91,8 +91,9 @@ int showSnake()
 int initWindow()
 {
     refresh();
-    mainArea = newwin(MAIN_AREA_HEIGHT + 2, MAIN_AREA_WIDTH + 2, 0, 0);
-    box(mainArea, MAIN_AREA_STARTY, MAIN_AREA_STARTX);
+/bin/bash: l: 未找到命令
+
+    box(mainArea, 0, 0);
     wrefresh(mainArea);
 
     return 0;

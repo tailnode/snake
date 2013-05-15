@@ -91,7 +91,6 @@ int showSnake()
 int initWindow()
 {
     refresh();
-/bin/bash: l: 未找到命令
 
     box(mainArea, 0, 0);
     wrefresh(mainArea);

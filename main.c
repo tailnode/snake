@@ -1,11 +1,13 @@
 #include <unistd.h>
 #include <ncurses.h>
 #include <pthread.h>
+#include <time.h>
 #include "define.h"
 
 int bodyLenth = START_LENGTH;   // 蛇的长度
 WINDOW* mainArea;
 Snake snake;
+Apple apple;
 Dir nextDir;
 
 int initWindow();
@@ -13,12 +15,19 @@ int initSnake();
 int showSnake();
 int moveSnake();
 void* getInput(void* arg);
+int genApple();
+int hitCheck(BodyNode* headNode);
+BOOL hitBoder(int x, int y);
+BOOL hitSnake(int x, int y);
+BOOL hitApple(int x, int y);
 
 int main()
 {
     int ret;
     int isHit;
     pthread_t getInputThread;
+
+    srand((int)time(0));
 
     initscr();
 
@@ -34,11 +43,13 @@ int main()
         return -1;
     }
 
+    genApple();
+
     while (true)
     {
         isHit = moveSnake();
 
-        if (HIT_HIT == isHit)
+        if (HIT_NOHIT != isHit)
         {
             break;
         }
@@ -91,7 +102,7 @@ int showSnake()
 int initWindow()
 {
     refresh();
-
+    mainArea = newwin(MAIN_AREA_HEIGHT + 2, MAIN_AREA_WIDTH + 2, MAIN_AREA_STARTY, MAIN_AREA_STARTX);
     box(mainArea, 0, 0);
     wrefresh(mainArea);
 
@@ -130,9 +141,9 @@ int moveSnake()
             return -1;
     }
 
-    if (HIT_HIT == hitCheck(&tmpNode))
+    if (HIT_NOHIT != hitCheck(&tmpNode))
     {
-        return HIT_HIT;
+        return -1;
     }
 
     for (index = snake.length - 1; index > 0; index--)
@@ -156,24 +167,37 @@ int hitCheck(BodyNode* headNode)
     int index;
     
     // 撞到边界
-    if (headNode->posX <= MAIN_AREA_STARTX ||
-        headNode->posY <= MAIN_AREA_STARTY ||
-        headNode->posX >= MAIN_AREA_STARTX + MAIN_AREA_WIDTH + 1 ||
-        headNode->posY >= MAIN_AREA_STARTY + MAIN_AREA_HEIGHT + 1)
+    if (hitBoder(headNode->posX, headNode->posY))
     {
-        return HIT_HIT;
+        return HIT_HITBODER;
     }
+//    if (headNode->posX <= MAIN_AREA_STARTX ||
+//        headNode->posY <= MAIN_AREA_STARTY ||
+//        headNode->posX >= MAIN_AREA_STARTX + MAIN_AREA_WIDTH + 1 ||
+//        headNode->posY >= MAIN_AREA_STARTY + MAIN_AREA_HEIGHT + 1)
+//    {
+//        return HIT_HITBODER;
+//    }
 
     // 撞到自己
-    for (index = 3; index < snake.length - 1; index++)
+    if (hitSnake(headNode->posX, headNode->posY))
     {
-        if (headNode->posX == snake.bodyNode[index].posX &&
-            headNode->posY == snake.bodyNode[index].posY)
-        {
-            return HIT_HIT;
-        }
+        return HIT_HITSELF;
     }
+//    for (index = 3; index < snake.length - 1; index++)
+//    {
+//        if (headNode->posX == snake.bodyNode[index].posX &&
+//            headNode->posY == snake.bodyNode[index].posY)
+//        {
+//            return HIT_HITSELF;
+//        }
+//    }
 
+    // 撞到苹果
+    if (hitApple(headNode->posX, headNode->posY))
+    {
+        genApple();
+    }
     return HIT_NOHIT;
 }
 
@@ -226,4 +250,71 @@ void* getInput(void* arg)
     } while (TRUE);
 
     return NULL;
+}
+
+int genApple()
+{
+    int tmpX;
+    int tmpY;
+
+    while (TRUE)
+    {
+        tmpX = rand() % MAIN_AREA_WIDTH + MAIN_AREA_STARTX + 1;
+        tmpY = rand() % MAIN_AREA_HEIGHT + MAIN_AREA_STARTY + 1;
+
+        if (!hitBoder(tmpX, tmpY) &&
+            !hitSnake(tmpX, tmpY))
+        {
+            apple.posX = tmpX;
+            apple.posY = tmpY;
+
+            break;
+        }
+    }
+
+    move(apple.posY, apple.posX);
+    printw("A");
+    move(0, 0);
+
+    return 0;
+}
+
+BOOL hitBoder(int x, int y)
+{
+    if (x <= MAIN_AREA_STARTX ||
+        y <= MAIN_AREA_STARTY ||
+        x >= MAIN_AREA_STARTX + MAIN_AREA_WIDTH + 1 ||
+        y >= MAIN_AREA_STARTY + MAIN_AREA_HEIGHT + 1)
+    {
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+BOOL hitSnake(int x, int y)
+{
+    int index;
+
+    for (index = 3; index < snake.length - 1; index++)
+    {
+        if (x == snake.bodyNode[index].posX &&
+            y == snake.bodyNode[index].posY)
+        {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+BOOL hitApple(int x, int y)
+{
+    if (x == apple.posX &&
+        y == apple.posY)
+    {
+        return TRUE;
+    }
+
+    return FALSE;
 }

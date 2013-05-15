@@ -1,6 +1,8 @@
 #ifndef __DEFINE_H__
 #define __DEFINE_H__
 
+typedef int BOOL;
+
 #define BODY_LENGTH_MAX     (100)   // 蛇身体的最大长度
 #define START_LENGTH        (5)     // 蛇的初始长度
 #define BODY_CHAR           ('0')   // 蛇的身体显示的字符
@@ -10,7 +12,9 @@
 #define MAIN_AREA_HEIGHT    (25)    // 游戏区域的高度
 
 #define HIT_NOHIT           (0)     // 没有碰撞
-#define HIT_HIT             (1)     // 碰撞
+#define HIT_HITBODER        (1)     // 碰撞到边界
+#define HIT_HITSELF         (2)     // 碰撞到自己
+#define HIT_HITAPPLE        (3)     // 碰撞到苹果
 
 // 蛇的前进方向
 typedef enum {
@@ -34,5 +38,11 @@ typedef struct {
     int length;
     BodyNode bodyNode[BODY_LENGTH_MAX];
 } Snake;
+
+// 苹果
+typedef struct {
+    int posX;
+    int posY;
+} Apple;
 
 #endif // __DEFINE_H__

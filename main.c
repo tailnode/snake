@@ -171,33 +171,19 @@ int hitCheck(BodyNode* headNode)
     {
         return HIT_HITBODER;
     }
-//    if (headNode->posX <= MAIN_AREA_STARTX ||
-//        headNode->posY <= MAIN_AREA_STARTY ||
-//        headNode->posX >= MAIN_AREA_STARTX + MAIN_AREA_WIDTH + 1 ||
-//        headNode->posY >= MAIN_AREA_STARTY + MAIN_AREA_HEIGHT + 1)
-//    {
-//        return HIT_HITBODER;
-//    }
 
     // 撞到自己
     if (hitSnake(headNode->posX, headNode->posY))
     {
         return HIT_HITSELF;
     }
-//    for (index = 3; index < snake.length - 1; index++)
-//    {
-//        if (headNode->posX == snake.bodyNode[index].posX &&
-//            headNode->posY == snake.bodyNode[index].posY)
-//        {
-//            return HIT_HITSELF;
-//        }
-//    }
 
     // 撞到苹果
     if (hitApple(headNode->posX, headNode->posY))
     {
         genApple();
     }
+
     return HIT_NOHIT;
 }
 

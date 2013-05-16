@@ -1,10 +1,11 @@
 #include <unistd.h>
 #include <ncurses.h>
+#include <string.h>
+#include <stdlib.h>
 #include <pthread.h>
 #include <time.h>
 #include "define.h"
 
-int bodyLenth = START_LENGTH;   // 蛇的长度
 WINDOW* mainArea;
 Snake snake;
 Apple apple;
@@ -20,6 +21,7 @@ int hitCheck(BodyNode* headNode);
 BOOL hitBoder(int x, int y);
 BOOL hitSnake(int x, int y);
 BOOL hitApple(int x, int y);
+int eatApple();
 
 int main()
 {
@@ -113,8 +115,9 @@ int initWindow()
 int moveSnake()
 {
     int index;
-    int oldTailNodeX = snake.bodyNode[bodyLenth - 1].posX;
-    int oldTailNodeY = snake.bodyNode[bodyLenth - 1].posY;
+    int hitResult;
+    int oldTailNodeX = snake.bodyNode[snake.length - 1].posX;
+    int oldTailNodeY = snake.bodyNode[snake.length - 1].posY;
     BodyNode tmpNode = snake.bodyNode[0];
     
     snake.dir = nextDir;
@@ -141,7 +144,13 @@ int moveSnake()
             return -1;
     }
 
-    if (HIT_NOHIT != hitCheck(&tmpNode))
+    hitResult = hitCheck(&tmpNode);
+    if (HIT_HITAPPLE == hitResult)
+    {
+        showSnake();
+        return 0;
+    }
+    else if (HIT_NOHIT != hitResult)
     {
         return -1;
     }
@@ -158,14 +167,12 @@ int moveSnake()
     printw(" ");
     showSnake();
 
-    return HIT_NOHIT;
+    return 0;
 }
 
 // 碰撞检测
 int hitCheck(BodyNode* headNode)
 {
-    int index;
-    
     // 撞到边界
     if (hitBoder(headNode->posX, headNode->posY))
     {
@@ -181,7 +188,10 @@ int hitCheck(BodyNode* headNode)
     // 撞到苹果
     if (hitApple(headNode->posX, headNode->posY))
     {
+        eatApple();
         genApple();
+
+        return HIT_HITAPPLE;
     }
 
     return HIT_NOHIT;
@@ -303,4 +313,28 @@ BOOL hitApple(int x, int y)
     }
 
     return FALSE;
+}
+
+int eatApple()
+{
+    int index;
+    BodyNode* tmp = (BodyNode*)malloc(snake.length * sizeof(BodyNode));
+    memcpy(tmp, &snake.bodyNode[0], snake.length * sizeof(BodyNode));
+    memcpy(&snake.bodyNode[1], tmp, snake.length * sizeof(BodyNode));
+
+    snake.length++;
+
+    snake.bodyNode[0].posX = apple.posX;
+    snake.bodyNode[0].posY = apple.posY;
+
+    for (index = 0; index < snake.length; index++)
+    {
+        snake.bodyNode[index].n = index;
+        snake.bodyNode[index].charactor = '0' + index;
+    }
+
+    free(tmp);
+    tmp = NULL;
+
+    return 0;
 }

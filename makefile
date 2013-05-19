@@ -1,4 +1,4 @@
-snake:main.c
+snake:main.c define.h
 	gcc -Wall -o snake main.c -lncurses -lpthread
 clean:
 	rm snake -f

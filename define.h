@@ -8,14 +8,18 @@ typedef int BOOL;
 #define BODY_CHAR           ('0')   // 蛇的身体显示的字符
 #define MAIN_AREA_STARTX    (5)     // 游戏区域开始的x坐标
 #define MAIN_AREA_STARTY    (5)     // 游戏区域开始的y坐标
-#define MAIN_AREA_WIDTH     (25)    // 游戏区域的宽度
-#define MAIN_AREA_HEIGHT    (25)    // 游戏区域的高度
+#define MAIN_AREA_WIDTH     (20)    // 游戏区域的宽度
+#define MAIN_AREA_HEIGHT    (20)    // 游戏区域的高度
+
+#define INFO_AREA_STARTX	(MAIN_AREA_STARTX + MAIN_AREA_WIDTH + 2)
+#define INFO_AREA_STARTY	(MAIN_AREA_STARTY)
 
 #define HIT_NOHIT           (0)     // 没有碰撞
 #define HIT_HITBODER        (1)     // 碰撞到边界
 #define HIT_HITSELF         (2)     // 碰撞到自己
 #define HIT_HITAPPLE        (3)     // 碰撞到苹果
 
+#define INIT_DELAY_TIME		(200000)// 每次移动前的等待时间
 // 蛇的前进方向
 typedef enum {
     UP = 0,

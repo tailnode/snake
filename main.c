@@ -10,6 +10,9 @@ WINDOW* mainArea;
 Snake snake;
 Apple apple;
 Dir nextDir;
+int score = 0;
+int speedLevel = 1;
+int delayTime = INIT_DELAY_TIME;
 
 int initWindow();
 int initSnake();
@@ -18,10 +21,11 @@ int moveSnake();
 void* getInput(void* arg);
 int genApple();
 int hitCheck(BodyNode* headNode);
-BOOL hitBoder(int x, int y);
+BOOL hitBorder(int x, int y);
 BOOL hitSnake(int x, int y);
 BOOL hitApple(int x, int y);
 int eatApple();
+void updateDelayTime();
 
 int main()
 {
@@ -47,7 +51,7 @@ int main()
 
     genApple();
 
-    while (true)
+    while (TRUE)
     {
         isHit = moveSnake();
 
@@ -56,7 +60,7 @@ int main()
             break;
         }
 
-        usleep(300000);
+        usleep(delayTime);
     }
 
     endwin();
@@ -107,6 +111,10 @@ int initWindow()
     mainArea = newwin(MAIN_AREA_HEIGHT + 2, MAIN_AREA_WIDTH + 2, MAIN_AREA_STARTY, MAIN_AREA_STARTX);
     box(mainArea, 0, 0);
     wrefresh(mainArea);
+
+	mvprintw(INFO_AREA_STARTY, INFO_AREA_STARTX + 2, "score: %-4d", score);
+	mvprintw(INFO_AREA_STARTY + 1, INFO_AREA_STARTX + 2, "speed level: %-4d", speedLevel);
+	move(0, 0);
 
     return 0;
 }
@@ -174,7 +182,7 @@ int moveSnake()
 int hitCheck(BodyNode* headNode)
 {
     // 撞到边界
-    if (hitBoder(headNode->posX, headNode->posY))
+    if (hitBorder(headNode->posX, headNode->posY))
     {
         return HIT_HITBODER;
     }
@@ -188,6 +196,12 @@ int hitCheck(BodyNode* headNode)
     // 撞到苹果
     if (hitApple(headNode->posX, headNode->posY))
     {
+		score++;
+		updateDelayTime();
+
+		mvprintw(INFO_AREA_STARTY, INFO_AREA_STARTX + 2, "score: %-4d", score);
+		mvprintw(INFO_AREA_STARTY + 1, INFO_AREA_STARTX + 2, "speed level: %-4d", speedLevel);
+		move(0, 0);
         eatApple();
         genApple();
 
@@ -237,7 +251,8 @@ void* getInput(void* arg)
 
             case 'q':
             case 'Q':
-                return NULL;
+                endwin();
+                exit(0);
                 break;
 
             default:
@@ -258,7 +273,7 @@ int genApple()
         tmpX = rand() % MAIN_AREA_WIDTH + MAIN_AREA_STARTX + 1;
         tmpY = rand() % MAIN_AREA_HEIGHT + MAIN_AREA_STARTY + 1;
 
-        if (!hitBoder(tmpX, tmpY) &&
+        if (!hitBorder(tmpX, tmpY) &&
             !hitSnake(tmpX, tmpY))
         {
             apple.posX = tmpX;
@@ -268,14 +283,13 @@ int genApple()
         }
     }
 
-    move(apple.posY, apple.posX);
-    printw("A");
+    mvprintw(apple.posY, apple.posX, "A");
     move(0, 0);
 
     return 0;
 }
 
-BOOL hitBoder(int x, int y)
+BOOL hitBorder(int x, int y)
 {
     if (x <= MAIN_AREA_STARTX ||
         y <= MAIN_AREA_STARTY ||
@@ -337,4 +351,14 @@ int eatApple()
     tmp = NULL;
 
     return 0;
+}
+
+// 更新移动速度
+void updateDelayTime()
+{
+	if (score != 0 && score % 10 == 0)
+	{
+		speedLevel++;
+		delayTime = delayTime * 9 / 10;
+	}
 }

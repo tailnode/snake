@@ -14,6 +14,10 @@ int score = 0;
 int speedLevel = 1;
 int delayTime = INIT_DELAY_TIME;
 
+pthread_t mainThread;
+BOOL isPause = FALSE;
+pthread_mutex_t mp = PTHREAD_MUTEX_INITIALIZER;
+
 int initWindow();
 int initSnake();
 int showSnake();
@@ -26,12 +30,15 @@ BOOL hitSnake(int x, int y);
 BOOL hitApple(int x, int y);
 int eatApple();
 void updateDelayTime();
+void pauseGame(int);
 
 int main()
 {
     int ret;
     int isHit;
     pthread_t getInputThread;
+	mainThread = pthread_self();
+	signal(SIGPAUSE, pauseGame);
 
     srand((int)time(0));
 
@@ -255,6 +262,24 @@ void* getInput(void* arg)
                 exit(0);
                 break;
 
+			case 'p':
+			case 'P':
+				// 向主线程发送信号使其阻塞
+				if (FALSE == isPause)
+				{
+					pthread_mutex_lock(&mp);
+					isPause = TRUE;
+
+					pthread_kill(mainThread, SIGPAUSE);
+				}
+				// 解开互斥锁，使主线程恢复运行
+				else
+				{
+					pthread_mutex_unlock(&mp);
+					isPause = FALSE;
+				}
+				break;	
+
             default:
                 break;
         }
@@ -361,4 +386,11 @@ void updateDelayTime()
 		speedLevel++;
 		delayTime = delayTime * 9 / 10;
 	}
+}
+
+void pauseGame(int arg)
+{
+	// 试图锁住互斥锁，导致线程阻塞
+	pthread_mutex_lock(&mp);
+	pthread_mutex_unlock(&mp);
 }

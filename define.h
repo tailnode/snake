@@ -1,6 +1,8 @@
 #ifndef __DEFINE_H__
 #define __DEFINE_H__
 
+#include <signal.h>
+
 typedef int BOOL;
 
 #define BODY_LENGTH_MAX     (100)   // 蛇身体的最大长度
@@ -20,6 +22,9 @@ typedef int BOOL;
 #define HIT_HITAPPLE        (3)     // 碰撞到苹果
 
 #define INIT_DELAY_TIME		(200000)// 每次移动前的等待时间
+
+#define SIGPAUSE	(SIGUSR1)		// 暂停的信号	
+
 // 蛇的前进方向
 typedef enum {
     UP = 0,

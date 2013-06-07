@@ -85,7 +85,7 @@ int initSnake()
 
     for (index = 0; index < START_LENGTH; index++)
     {
-        snake.bodyNode[index].charactor = BODY_CHAR + index;
+        snake.bodyNode[index].charactor = 'v';
         snake.bodyNode[index].posX = MAIN_AREA_STARTX + START_LENGTH - index;
         snake.bodyNode[index].posY = MAIN_AREA_STARTY + 1;
         snake.bodyNode[index].n = index;
@@ -141,18 +141,22 @@ int moveSnake()
     {
         case UP:
             tmpNode.posY--;
+	    tmpNode.charactor = '^';
             break;
 
         case DOWN:
             tmpNode.posY++;
+	    tmpNode.charactor = 'v';
             break;
 
         case LEFT:
             tmpNode.posX--;
+	    tmpNode.charactor = '<';
             break;
 
         case RIGHT:
             tmpNode.posX++;
+	    tmpNode.charactor = '>';
             break;
 
         default:
@@ -174,6 +178,7 @@ int moveSnake()
     {
         snake.bodyNode[index].posX = snake.bodyNode[index - 1].posX;
         snake.bodyNode[index].posY = snake.bodyNode[index - 1].posY;
+        snake.bodyNode[index].charactor = snake.bodyNode[index - 1].charactor;
     }
 
     snake.bodyNode[0] = tmpNode;
@@ -331,7 +336,7 @@ BOOL hitSnake(int x, int y)
 {
     int index;
 
-    for (index = 3; index < snake.length - 1; index++)
+    for (index = 0; index < snake.length - 1; index++)
     {
         if (x == snake.bodyNode[index].posX &&
             y == snake.bodyNode[index].posY)
@@ -366,10 +371,31 @@ int eatApple()
     snake.bodyNode[0].posX = apple.posX;
     snake.bodyNode[0].posY = apple.posY;
 
+    switch (snake.dir)
+    {
+        case UP:
+            snake.bodyNode[0].charactor = '^';
+            break;
+
+        case DOWN:
+	    snake.bodyNode[0].charactor = 'v';
+            break;
+
+        case LEFT:
+	    snake.bodyNode[0].charactor = '<';
+            break;
+
+        case RIGHT:
+	    snake.bodyNode[0].charactor = '>';
+            break;
+
+        default:
+            return -1;
+    }
+
     for (index = 0; index < snake.length; index++)
     {
         snake.bodyNode[index].n = index;
-        snake.bodyNode[index].charactor = '0' + index;
     }
 
     free(tmp);

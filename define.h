@@ -64,7 +64,6 @@ int initWindow();
 int initSnake();
 int showSnake();
 int moveSnake();
-void* getInput(void* arg);
 int genApple();
 int hitCheck(BodyNode* headNode);
 bool hitBorder(int x, int y);
@@ -73,5 +72,6 @@ bool hitApple(int x, int y);
 int eatApple();
 void updateDelayTime();
 void pauseGame(int);
+int startInputThread();
 
 #endif // __DEFINE_H__

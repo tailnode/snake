@@ -280,10 +280,7 @@ void pauseGame(int arg)
 
 int initGame()
 {
-	pthread_t getInputThread;
-	
-	// 启动线程，接收按键输入
-	if (0 != pthread_create(&getInputThread, NULL, getInput, NULL))
+	if (0 != startInputThread())
 	{
 		return -1;
 	}

@@ -86,18 +86,16 @@ int main()
 // 初始化蛇的方向，长度，各节点的位置和显示的字符
 int initSnake()
 {
-	int index;
-
 	snake.dir = DOWN;
 	nextDir = snake.dir;
 	snake.length = START_LENGTH;
 
-	for (index = 0; index < START_LENGTH; index++)
+	for (size_t i = 0; i < START_LENGTH; i++)
 	{
-		snake.bodyNode[index].charactor = BODY_CHAR_DOWN;
-		snake.bodyNode[index].posX = MAIN_AREA_STARTX + START_LENGTH - index;
-		snake.bodyNode[index].posY = MAIN_AREA_STARTY + 1;
-		snake.bodyNode[index].n = index;
+		snake.bodyNode[i].charactor = BODY_CHAR_DOWN;
+		snake.bodyNode[i].posX = MAIN_AREA_STARTX + START_LENGTH - i;
+		snake.bodyNode[i].posY = MAIN_AREA_STARTY + 1;
+		snake.bodyNode[i].n = i;
 	}
 
 	return 0;
@@ -106,12 +104,10 @@ int initSnake()
 // 显示蛇
 int showSnake()
 {
-	int index;
-
-	for (index = 0; index < snake.length; index++)
+	for (size_t i = 0; i < snake.length; i++)
 	{
-		move(snake.bodyNode[index].posY, snake.bodyNode[index].posX);
-		printw("%c", snake.bodyNode[index].charactor);
+		move(snake.bodyNode[i].posY, snake.bodyNode[i].posX);
+		printw("%c", snake.bodyNode[i].charactor);
 	}
 
 	move(0, 0);
@@ -138,7 +134,6 @@ int initWindow()
 // 移动，显示蛇
 int moveSnake()
 {
-	int index;
 	int hitResult;
 	int oldTailNodeX = snake.bodyNode[snake.length - 1].posX;
 	int oldTailNodeY = snake.bodyNode[snake.length - 1].posY;
@@ -161,11 +156,11 @@ int moveSnake()
 		return -1;
 	}
 
-	for (index = snake.length - 1; index > 0; index--)
+	for (size_t i = snake.length - 1; i > 0; i--)
 	{
-		snake.bodyNode[index].posX = snake.bodyNode[index - 1].posX;
-		snake.bodyNode[index].posY = snake.bodyNode[index - 1].posY;
-		snake.bodyNode[index].charactor = snake.bodyNode[index - 1].charactor;
+		snake.bodyNode[i].posX = snake.bodyNode[i - 1].posX;
+		snake.bodyNode[i].posY = snake.bodyNode[i - 1].posY;
+		snake.bodyNode[i].charactor = snake.bodyNode[i - 1].charactor;
 	}
 
 	snake.bodyNode[0] = tmpNode;
@@ -321,12 +316,10 @@ BOOL hitBorder(int x, int y)
 
 BOOL hitSnake(int x, int y)
 {
-	int index;
-
-	for (index = 0; index < snake.length - 1; index++)
+	for (size_t i = 0; i < snake.length - 1; i++)
 	{
-		if (x == snake.bodyNode[index].posX &&
-				y == snake.bodyNode[index].posY)
+		if (x == snake.bodyNode[i].posX &&
+				y == snake.bodyNode[i].posY)
 		{
 			return TRUE;
 		}
@@ -348,7 +341,6 @@ BOOL hitApple(int x, int y)
 
 int eatApple()
 {
-	int index;
 	BodyNode* tmp = (BodyNode*)malloc(snake.length * sizeof(BodyNode));
 	memcpy(tmp, &snake.bodyNode[0], snake.length * sizeof(BodyNode));
 	memcpy(&snake.bodyNode[1], tmp, snake.length * sizeof(BodyNode));
@@ -359,9 +351,9 @@ int eatApple()
 	snake.bodyNode[0].posY = apple.posY;
 	snake.bodyNode[0].charactor = matrix[snake.dir].charactor;
 
-	for (index = 0; index < snake.length; index++)
+	for (size_t i = 0; i < snake.length; i++)
 	{
-		snake.bodyNode[index].n = index;
+		snake.bodyNode[i].n = i;
 	}
 
 	free(tmp);

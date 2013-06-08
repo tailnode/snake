@@ -6,10 +6,10 @@
 #include <time.h>
 #include "define.h"
 
+extern Dir nextDir;
 WINDOW* mainArea;
 Snake snake;
 Apple apple;
-Dir nextDir;
 int score = 0;
 int speedLevel = 1;
 int delayTime = INIT_DELAY_TIME;
@@ -24,24 +24,7 @@ static const struct {
 	{BODY_CHAR_RIGHT,	1,	0}};
 
 pthread_t mainThread;
-bool isPause = false;
 pthread_mutex_t mp = PTHREAD_MUTEX_INITIALIZER;
-
-int initGame();
-void exitGame(int exitCode);
-int initWindow();
-int initSnake();
-int showSnake();
-int moveSnake();
-void* getInput(void* arg);
-int genApple();
-int hitCheck(BodyNode* headNode);
-bool hitBorder(int x, int y);
-bool hitSnake(int x, int y);
-bool hitApple(int x, int y);
-int eatApple();
-void updateDelayTime();
-void pauseGame(int);
 
 int main()
 {
@@ -189,75 +172,6 @@ int hitCheck(BodyNode* headNode)
 	}
 
 	return HIT_NOHIT;
-}
-
-// 取得键盘输入，改变蛇的移动方向或退出
-void* getInput(void* arg)
-{
-	keypad(stdscr, true);
-	noecho();
-
-	do
-	{
-		switch (getch())
-		{
-			case KEY_RIGHT:
-				if (snake.dir != LEFT)
-				{
-					nextDir = RIGHT;
-				}
-				break;
-
-			case KEY_LEFT:
-				if (snake.dir != RIGHT)
-				{
-					nextDir = LEFT;
-				}
-				break;
-
-			case KEY_UP:
-				if (snake.dir != DOWN)
-				{
-					nextDir = UP;
-				}
-				break;
-
-			case KEY_DOWN:
-				if (snake.dir != UP)
-				{
-					nextDir = DOWN;
-				}
-				break;
-
-			case 'q':
-			case 'Q':
-				exitGame(0);
-				break;
-
-			case 'p':
-			case 'P':
-				// 向主线程发送信号使其阻塞
-				if (false == isPause)
-				{
-					pthread_mutex_lock(&mp);
-					isPause = true;
-
-					pthread_kill(mainThread, SIGPAUSE);
-				}
-				// 解开互斥锁，使主线程恢复运行
-				else
-				{
-					pthread_mutex_unlock(&mp);
-					isPause = false;
-				}
-				break;	
-
-			default:
-				break;
-		}
-	} while (true);
-
-	return NULL;
 }
 
 int genApple()

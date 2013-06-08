@@ -3,14 +3,14 @@
 
 #include <signal.h>
 
-typedef int BOOL;
-
 #define BODY_LENGTH_MAX     (100)   // 蛇身体的最大长度
 #define START_LENGTH        (5)     // 蛇的初始长度
 #define BODY_CHAR_UP		('^')	// 向上移动时显示的字符
 #define BODY_CHAR_DOWN		('v')	// 向下移动时显示的字符
 #define BODY_CHAR_LEFT		('<')	// 向左移动时显示的字符
 #define BODY_CHAR_RIGHT		('>')	// 向右移动时显示的字符
+
+#define APPLE_CHAR			("A")	// 苹果显示的字符
 
 #define MAIN_AREA_STARTX    (5)     // 游戏区域开始的x坐标
 #define MAIN_AREA_STARTY    (5)     // 游戏区域开始的y坐标

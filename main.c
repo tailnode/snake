@@ -24,9 +24,11 @@ static const struct {
 	{BODY_CHAR_RIGHT,	1,	0}};
 
 pthread_t mainThread;
-BOOL isPause = FALSE;
+bool isPause = false;
 pthread_mutex_t mp = PTHREAD_MUTEX_INITIALIZER;
 
+int initGame();
+void exitGame(int exitCode);
 int initWindow();
 int initSnake();
 int showSnake();
@@ -34,40 +36,25 @@ int moveSnake();
 void* getInput(void* arg);
 int genApple();
 int hitCheck(BodyNode* headNode);
-BOOL hitBorder(int x, int y);
-BOOL hitSnake(int x, int y);
-BOOL hitApple(int x, int y);
+bool hitBorder(int x, int y);
+bool hitSnake(int x, int y);
+bool hitApple(int x, int y);
 int eatApple();
 void updateDelayTime();
 void pauseGame(int);
 
 int main()
 {
-	int ret;
 	int isHit;
-	pthread_t getInputThread;
-	mainThread = pthread_self();
-	signal(SIGPAUSE, pauseGame);
-
-	srand((int)time(0));
 
 	initscr();
 
-	initWindow();
-
-	initSnake();
-	showSnake();
-
-	// 启动线程，接收按键输入
-	ret = pthread_create(&getInputThread, NULL, getInput, NULL);
-	if (ret != 0)
+	if (0 != initGame())
 	{
-		return -1;
+		exitGame(-1);
 	}
 
-	genApple();
-
-	while (TRUE)
+	while (true)
 	{
 		isHit = moveSnake();
 
@@ -78,9 +65,8 @@ int main()
 
 		usleep(delayTime);
 	}
-
-	endwin();
-	return 0;
+	
+	exitGame(0);
 }
 
 // 初始化蛇的方向，长度，各节点的位置和显示的字符
@@ -146,27 +132,36 @@ int moveSnake()
 	tmpNode.posY += matrix[snake.dir].posY_offset;
 
 	hitResult = hitCheck(&tmpNode);
-	if (HIT_HITAPPLE == hitResult)
+	if (HIT_NOHIT == hitResult)
 	{
-		showSnake();
-		return 0;
+		for (size_t i = snake.length - 1; i > 0; i--)
+		{
+			snake.bodyNode[i].posX = snake.bodyNode[i - 1].posX;
+			snake.bodyNode[i].posY = snake.bodyNode[i - 1].posY;
+			snake.bodyNode[i].charactor = snake.bodyNode[i - 1].charactor;
+		}
+
+		snake.bodyNode[0] = tmpNode;
+
+		move(oldTailNodeY, oldTailNodeX);
+		printw(" ");
 	}
-	else if (HIT_NOHIT != hitResult)
+	else if (HIT_HITAPPLE == hitResult)
+	{
+		score++;
+		updateDelayTime();
+
+		mvprintw(INFO_AREA_STARTY, INFO_AREA_STARTX + 2, "score: %-4d", score);
+		mvprintw(INFO_AREA_STARTY + 1, INFO_AREA_STARTX + 2, "speed level: %-4d", speedLevel);
+		move(0, 0);
+		eatApple();
+		genApple();
+	}
+	else
 	{
 		return -1;
 	}
 
-	for (size_t i = snake.length - 1; i > 0; i--)
-	{
-		snake.bodyNode[i].posX = snake.bodyNode[i - 1].posX;
-		snake.bodyNode[i].posY = snake.bodyNode[i - 1].posY;
-		snake.bodyNode[i].charactor = snake.bodyNode[i - 1].charactor;
-	}
-
-	snake.bodyNode[0] = tmpNode;
-
-	move(oldTailNodeY, oldTailNodeX);
-	printw(" ");
 	showSnake();
 
 	return 0;
@@ -190,15 +185,6 @@ int hitCheck(BodyNode* headNode)
 	// 撞到苹果
 	if (hitApple(headNode->posX, headNode->posY))
 	{
-		score++;
-		updateDelayTime();
-
-		mvprintw(INFO_AREA_STARTY, INFO_AREA_STARTX + 2, "score: %-4d", score);
-		mvprintw(INFO_AREA_STARTY + 1, INFO_AREA_STARTX + 2, "speed level: %-4d", speedLevel);
-		move(0, 0);
-		eatApple();
-		genApple();
-
 		return HIT_HITAPPLE;
 	}
 
@@ -208,7 +194,7 @@ int hitCheck(BodyNode* headNode)
 // 取得键盘输入，改变蛇的移动方向或退出
 void* getInput(void* arg)
 {
-	keypad(stdscr, TRUE);
+	keypad(stdscr, true);
 	noecho();
 
 	do
@@ -245,17 +231,16 @@ void* getInput(void* arg)
 
 			case 'q':
 			case 'Q':
-				endwin();
-				exit(0);
+				exitGame(0);
 				break;
 
 			case 'p':
 			case 'P':
 				// 向主线程发送信号使其阻塞
-				if (FALSE == isPause)
+				if (false == isPause)
 				{
 					pthread_mutex_lock(&mp);
-					isPause = TRUE;
+					isPause = true;
 
 					pthread_kill(mainThread, SIGPAUSE);
 				}
@@ -263,14 +248,14 @@ void* getInput(void* arg)
 				else
 				{
 					pthread_mutex_unlock(&mp);
-					isPause = FALSE;
+					isPause = false;
 				}
 				break;	
 
 			default:
 				break;
 		}
-	} while (TRUE);
+	} while (true);
 
 	return NULL;
 }
@@ -280,7 +265,7 @@ int genApple()
 	int tmpX;
 	int tmpY;
 
-	while (TRUE)
+	while (true)
 	{
 		tmpX = rand() % MAIN_AREA_WIDTH + MAIN_AREA_STARTX + 1;
 		tmpY = rand() % MAIN_AREA_HEIGHT + MAIN_AREA_STARTY + 1;
@@ -295,48 +280,48 @@ int genApple()
 		}
 	}
 
-	mvprintw(apple.posY, apple.posX, "A");
+	mvprintw(apple.posY, apple.posX, APPLE_CHAR);
 	move(0, 0);
 
 	return 0;
 }
 
-BOOL hitBorder(int x, int y)
+bool hitBorder(int x, int y)
 {
 	if (x <= MAIN_AREA_STARTX ||
 			y <= MAIN_AREA_STARTY ||
 			x >= MAIN_AREA_STARTX + MAIN_AREA_WIDTH + 1 ||
 			y >= MAIN_AREA_STARTY + MAIN_AREA_HEIGHT + 1)
 	{
-		return TRUE;
+		return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
-BOOL hitSnake(int x, int y)
+bool hitSnake(int x, int y)
 {
 	for (size_t i = 0; i < snake.length - 1; i++)
 	{
 		if (x == snake.bodyNode[i].posX &&
 				y == snake.bodyNode[i].posY)
 		{
-			return TRUE;
+			return true;
 		}
 	}
 
-	return FALSE;
+	return false;
 }
 
-BOOL hitApple(int x, int y)
+bool hitApple(int x, int y)
 {
 	if (x == apple.posX &&
 			y == apple.posY)
 	{
-		return TRUE;
+		return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
 int eatApple()
@@ -377,4 +362,35 @@ void pauseGame(int arg)
 	// 试图锁住互斥锁，导致线程阻塞
 	pthread_mutex_lock(&mp);
 	pthread_mutex_unlock(&mp);
+}
+
+int initGame()
+{
+	pthread_t getInputThread;
+	
+	// 启动线程，接收按键输入
+	if (0 != pthread_create(&getInputThread, NULL, getInput, NULL))
+	{
+		return -1;
+	}
+
+	mainThread = pthread_self();
+	signal(SIGPAUSE, pauseGame);
+	srand((int)time(0));
+	initWindow();
+	initSnake();
+	showSnake();
+	genApple();
+
+	return 0;
+}
+
+void exitGame(int exitCode)
+{
+	endwin();
+	if (0 != exitCode)
+	{
+		printf("error.\n");
+	}
+	exit(exitCode);
 }

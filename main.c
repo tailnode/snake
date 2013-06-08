@@ -7,7 +7,6 @@
 #include "define.h"
 
 extern Dir nextDir;
-WINDOW* mainArea;
 Snake snake;
 Apple apple;
 int score = 0;
@@ -88,6 +87,8 @@ int showSnake()
 // 画出游戏主区域的框
 int initWindow()
 {
+	WINDOW* mainArea;
+
 	refresh();
 	mainArea = newwin(MAIN_AREA_HEIGHT + 2, MAIN_AREA_WIDTH + 2, MAIN_AREA_STARTY, MAIN_AREA_STARTX);
 	box(mainArea, 0, 0);

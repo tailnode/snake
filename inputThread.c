@@ -72,6 +72,12 @@ static void* getInput(void* arg)
 				}
 				break;	
 
+			case 'r':
+			case 'R':
+				// 重新开始
+				pthread_kill(mainThread, SIGRESTART);
+				break;
+
 			default:
 				break;
 		}

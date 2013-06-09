@@ -7,11 +7,12 @@
 #include "define.h"
 
 extern Dir nextDir;
-Snake snake;
-Apple apple;
-int score = 0;
-int speedLevel = 1;
-int delayTime = INIT_DELAY_TIME;
+static bool gameOver;
+static bool restart;
+static int score;
+static int speedLevel;
+static int delayTime;
+static Apple apple;
 static const struct {
 	char charactor;
 	char posX_offset;
@@ -22,13 +23,12 @@ static const struct {
 	{BODY_CHAR_LEFT,	-1,	0},	
 	{BODY_CHAR_RIGHT,	1,	0}};
 
+Snake snake;
 pthread_t mainThread;
 pthread_mutex_t mp = PTHREAD_MUTEX_INITIALIZER;
 
 int main()
 {
-	int isHit;
-
 	initscr();
 
 	if (0 != initGame())
@@ -36,18 +36,13 @@ int main()
 		exitGame(-1);
 	}
 
-	while (true)
+	do
 	{
-		isHit = moveSnake();
+		restart = false;
+		runGame();
+		pause();
+	} while (true == restart);
 
-		if (HIT_NOHIT != isHit)
-		{
-			break;
-		}
-
-		usleep(delayTime);
-	}
-	
 	exitGame(0);
 }
 
@@ -57,6 +52,7 @@ int initSnake()
 	snake.dir = DOWN;
 	nextDir = snake.dir;
 	snake.length = START_LENGTH;
+	delayTime = INIT_DELAY_TIME;
 
 	for (size_t i = 0; i < START_LENGTH; i++)
 	{
@@ -94,6 +90,8 @@ int initWindow()
 	box(mainArea, 0, 0);
 	wrefresh(mainArea);
 
+	score = 0;
+	speedLevel = 1;
 	mvprintw(INFO_AREA_STARTY, INFO_AREA_STARTX + 2, "score: %-4d", score);
 	mvprintw(INFO_AREA_STARTY + 1, INFO_AREA_STARTX + 2, "speed level: %-4d", speedLevel);
 	move(0, 0);
@@ -143,6 +141,7 @@ int moveSnake()
 	}
 	else
 	{
+		gameOver = true;
 		return -1;
 	}
 
@@ -279,6 +278,19 @@ void pauseGame(int arg)
 	pthread_mutex_unlock(&mp);
 }
 
+void restartGame(int arg)
+{
+	if (true == gameOver)
+	{
+		gameOver = false;
+		restart = true;
+		initWindow();
+		initSnake();
+		showSnake();
+		genApple();
+	}
+}
+
 int initGame()
 {
 	if (0 != startInputThread())
@@ -286,8 +298,11 @@ int initGame()
 		return -1;
 	}
 
+	gameOver = false;
+	restart = false;
 	mainThread = pthread_self();
 	signal(SIGPAUSE, pauseGame);
+	signal(SIGRESTART, restartGame);
 	srand((int)time(0));
 	initWindow();
 	initSnake();
@@ -305,4 +320,12 @@ void exitGame(int exitCode)
 		printf("error.\n");
 	}
 	exit(exitCode);
+}
+
+void runGame()
+{
+	while (0 == moveSnake())
+	{
+		usleep(delayTime);
+	}
 }

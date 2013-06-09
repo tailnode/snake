@@ -28,6 +28,7 @@
 #define INIT_DELAY_TIME		(200000)// 每次移动前的等待时间
 
 #define SIGPAUSE	(SIGUSR1)		// 暂停的信号	
+#define SIGRESTART	(SIGUSR2)		// 重新开始的信号	
 
 // 蛇的前进方向
 typedef enum {
@@ -72,6 +73,8 @@ bool hitApple(int x, int y);
 int eatApple();
 void updateDelayTime();
 void pauseGame(int);
+void restartGame(int);
 int startInputThread();
+void runGame();
 
 #endif // __DEFINE_H__
